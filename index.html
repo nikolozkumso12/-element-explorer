@@ -6,21 +6,20 @@
 <title>Interactive Periodic Table</title>
 
 <style>
-body{font-family:Arial;background:#f3f7ff;margin:0;text-align:center;color:#1f2937}
+body{font-family:Arial;background:#f3f7ff;margin:0;text-align:center;color:#1f2937;transition:.3s}
 header{padding:25px;background:#1f4e79;color:white}
-button{padding:12px 18px;margin:8px;border:0;border-radius:10px;background:#0077cc;color:white;cursor:pointer;font-size:16px}
-button:hover{transform:scale(1.05)}
+button{padding:12px 18px;margin:8px;border:0;border-radius:10px;background:#0077cc;color:white;cursor:pointer;font-size:16px;transition:.2s}
+button:hover{transform:scale(1.05);background:#005fa3}
 .table{display:grid;grid-template-columns:repeat(6,70px);gap:8px;justify-content:center;margin:25px auto}
-.el{background:white;border-radius:10px;padding:8px;height:65px;box-shadow:0 2px 6px #bbb;cursor:pointer}
+.el{background:white;border-radius:10px;padding:8px;height:65px;box-shadow:0 2px 6px #bbb;cursor:pointer;transition:.2s}
 .el:hover{background:#e8f5ff;transform:scale(1.08)}
-.num{font-size:11px;text-align:left}
-.sym{font-size:23px;font-weight:bold;color:#0077cc}
-.name{font-size:10px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
-.card{background:white;border-radius:18px;max-width:400px;padding:25px;text-align:left}
-.close{float:right;font-size:25px;cursor:pointer}
-.big{text-align:center;font-size:55px;color:#0077cc;font-weight:bold}
-#quizSection{margin:40px}
+.num{font-size:11px;text-align:left}.sym{font-size:23px;font-weight:bold;color:#0077cc}.name{font-size:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:10}
+.card{background:white;border-radius:18px;max-width:400px;padding:25px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.close{float:right;font-size:25px;cursor:pointer}.big{text-align:center;font-size:55px;color:#0077cc;font-weight:bold}
+#quizSection{margin:40px}.correct{background:#16a34a!important}.wrong{background:#dc2626!important}
+.dark{background:#121212;color:white}.dark header{background:#000}.dark .el{background:#1f1f1f;color:white;box-shadow:0 2px 8px #000}.dark .el:hover{background:#263244}.dark .card{background:#222;color:white}.dark .sym,.dark .big{color:#4db8ff}.dark button{background:#374151}.dark button:hover{background:#4b5563}
+@media(max-width:700px){.table{grid-template-columns:repeat(4,70px)}}
 </style>
 </head>
 
@@ -29,13 +28,14 @@ button:hover{transform:scale(1.05)}
 <header id="elements">
 <h1>🧪 Interactive Periodic Table</h1>
 <p>Click an element to see information</p>
+<button onclick="toggleDark()">🌙 Dark Mode</button>
 <button onclick="document.getElementById('quizSection').scrollIntoView({behavior:'smooth'})">🧠 Go to Quiz</button>
 </header>
 
 <div class="table" id="table"></div>
 
-<div class="modal" id="modal">
-<div class="card">
+<div class="modal" id="modal" onclick="closeModal()">
+<div class="card" onclick="event.stopPropagation()">
 <span class="close" onclick="closeModal()">×</span>
 <div class="big" id="mSymbol"></div>
 <h2 id="mName"></h2>
@@ -54,9 +54,7 @@ button:hover{transform:scale(1.05)}
 <p id="score"></p>
 </div>
 
-<button onclick="document.getElementById('elements').scrollIntoView({behavior:'smooth'})">
-🧪 Back to Periodic Table
-</button>
+<button onclick="document.getElementById('elements').scrollIntoView({behavior:'smooth'})">🧪 Back to Periodic Table</button>
 
 <h2>🥇 Leaderboard</h2>
 <ol id="leaderboard"></ol>
@@ -87,22 +85,18 @@ const elements = [
 ];
 
 const table=document.getElementById("table");
-elements.forEach((e,i)=>{
-table.innerHTML+=`
-<div class="el" onclick="openModal('${e[0]}','${e[1]}',${i+1})">
-<div class="num">${i+1}</div>
-<div class="sym">${e[0]}</div>
-<div class="name">${e[1]}</div>
-</div>`;
-});
-
-function openModal(sym,name,num){
-document.getElementById("modal").style.display="flex";
-document.getElementById("mSymbol").innerHTML=sym;
-document.getElementById("mName").innerHTML=name;
-document.getElementById("mInfo").innerHTML="Atomic number: "+num+"<br>This is the element "+name+".";
-}
+elements.forEach((e,i)=>{table.innerHTML+=`<div class="el" onclick="openModal('${e[0]}','${e[1]}',${i+1})"><div class="num">${i+1}</div><div class="sym">${e[0]}</div><div class="name">${e[1]}</div></div>`;});
+function openModal(sym,name,num){document.getElementById("modal").style.display="flex";document.getElementById("mSymbol").innerHTML=sym;document.getElementById("mName").innerHTML=name;document.getElementById("mInfo").innerHTML="Atomic number: "+num+"<br>This is the element "+name+".";}
 function closeModal(){document.getElementById("modal").style.display="none";}
+function toggleDark(){document.body.classList.toggle("dark");}
+function beep(type){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator(); const gain=ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.frequency.value=type==='correct'?700:180;
+  gain.gain.value=.08; osc.start();
+  setTimeout(()=>{osc.stop();ctx.close();}, type==='correct'?150:250);
+}
 
 const quizQuestions=[
 {q:"What is the symbol of Oxygen?",a:"O",options:["O","H","N","C"]},
@@ -116,55 +110,21 @@ const quizQuestions=[
 {q:"What is the symbol of Calcium?",a:"Ca",options:["C","Ca","Cl","Co"]},
 {q:"What is the symbol of Chlorine?",a:"Cl",options:["C","Ca","Cl","Ch"]}
 ];
-
 let current=0,points=0,time=60,timer;
-
-function startQuiz(){
-current=0;points=0;time=60;
-document.getElementById("quizBox").style.display="block";
-showQuestion();
-clearInterval(timer);
-timer=setInterval(()=>{
-time--;
-document.getElementById("timer").innerHTML="Time: "+time;
-if(time<=0)finishQuiz();
-},1000);
+function startQuiz(){current=0;points=0;time=60;document.getElementById("quizBox").style.display="block";showQuestion();clearInterval(timer);timer=setInterval(()=>{time--;document.getElementById("timer").innerHTML="Time: "+time;if(time<=0)finishQuiz();},1000);}
+function showQuestion(){let q=quizQuestions[current];document.getElementById("question").innerHTML="Question "+(current+1)+"/10: "+q.q;document.getElementById("answers").innerHTML=q.options.map(o=>`<button onclick="answer('${o}', this)">${o}</button>`).join("");document.getElementById("score").innerHTML="Score: "+points;}
+function answer(choice,btn){
+  const right=quizQuestions[current].a;
+  const buttons=document.querySelectorAll("#answers button");
+  buttons.forEach(b=>b.disabled=true);
+  if(choice===right){points++;btn.classList.add("correct");beep('correct');}
+  else{btn.classList.add("wrong");beep('wrong');buttons.forEach(b=>{if(b.innerText===right)b.classList.add("correct")});}
+  current++;
+  setTimeout(()=>{if(current>=10)finishQuiz();else showQuestion();},700);
 }
-
-function showQuestion(){
-let q=quizQuestions[current];
-document.getElementById("question").innerHTML="Question "+(current+1)+"/10: "+q.q;
-document.getElementById("answers").innerHTML=q.options.map(o=>`<button onclick="answer('${o}')">${o}</button>`).join("");
-document.getElementById("score").innerHTML="Score: "+points;
-}
-
-function answer(choice){
-if(choice===quizQuestions[current].a)points++;
-current++;
-if(current>=10)finishQuiz(); else showQuestion();
-}
-
-function finishQuiz(){
-clearInterval(timer);
-document.getElementById("question").innerHTML="🏆 Quiz Finished!";
-document.getElementById("answers").innerHTML="";
-document.getElementById("score").innerHTML="Score: "+points+"/10";
-let name=prompt("Enter your name:");
-if(!name)name="Player";
-let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];
-leaderboard.push({name:name,score:points});
-leaderboard.sort((a,b)=>b.score-a.score);
-leaderboard=leaderboard.slice(0,5);
-localStorage.setItem("leaderboard",JSON.stringify(leaderboard));
-showLeaderboard();
-}
-
-function showLeaderboard(){
-let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];
-document.getElementById("leaderboard").innerHTML=leaderboard.map(p=>`<li>${p.name} - ${p.score}/10</li>`).join("");
-}
+function finishQuiz(){clearInterval(timer);document.getElementById("question").innerHTML="🏆 Quiz Finished!";document.getElementById("answers").innerHTML="";document.getElementById("score").innerHTML="Score: "+points+"/10";let name=prompt("Enter your name:");if(!name)name="Player";let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];let existing=leaderboard.find(p=>p.name===name);if(existing){if(points>existing.score){existing.score=points;alert("🎉 New High Score!");}else{alert("❌ You must beat your previous score ("+existing.score+"/10) to save a new result.");showLeaderboard();return;}}else{leaderboard.push({name:name,score:points});}leaderboard.sort((a,b)=>b.score-a.score);leaderboard=leaderboard.slice(0,5);localStorage.setItem("leaderboard",JSON.stringify(leaderboard));showLeaderboard();}
+function showLeaderboard(){let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];document.getElementById("leaderboard").innerHTML=leaderboard.map(p=>`<li>${p.name} - ${p.score}/10</li>`).join("");}
 showLeaderboard();
 </script>
-
 </body>
 </html>
