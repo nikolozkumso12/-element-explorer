@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interactive Periodic Table</title>
+<title>Element Explorer</title>
 
 <style>
 body{font-family:Arial;background:#f3f7ff;margin:0;text-align:center;color:#1f2937;transition:.3s}
@@ -17,19 +17,23 @@ button:hover{transform:scale(1.05);background:#005fa3}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:10}
 .card{background:white;border-radius:18px;max-width:400px;padding:25px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .close{float:right;font-size:25px;cursor:pointer}.big{text-align:center;font-size:55px;color:#0077cc;font-weight:bold}
-#quizSection{margin:40px}.correct{background:#16a34a!important}.wrong{background:#dc2626!important}
-.dark{background:#121212;color:white}.dark header{background:#000}.dark .el{background:#1f1f1f;color:white;box-shadow:0 2px 8px #000}.dark .el:hover{background:#263244}.dark .card{background:#222;color:white}.dark .sym,.dark .big{color:#4db8ff}.dark button{background:#374151}.dark button:hover{background:#4b5563}
+#quizSection,#aiChat{margin:40px}.correct{background:#16a34a!important}.wrong{background:#dc2626!important}
+#chatInput{padding:12px;width:260px;max-width:80%;border-radius:10px;border:1px solid #ccc}
+#chatAnswer{font-size:18px;max-width:600px;margin:15px auto;line-height:1.5}
+.dark{background:#121212;color:white}.dark header{background:#000}.dark .el{background:#1f1f1f;color:white;box-shadow:0 2px 8px #000}.dark .el:hover{background:#263244}.dark .card{background:#222;color:white}.dark .sym,.dark .big{color:#4db8ff}.dark button{background:#374151}.dark button:hover{background:#4b5563}.dark #chatInput{background:#222;color:white;border-color:#555}
 @media(max-width:700px){.table{grid-template-columns:repeat(4,70px)}}
+@media(max-width:380px){.table{grid-template-columns:repeat(3,70px)}}
 </style>
 </head>
 
 <body>
 
 <header id="elements">
-<h1>🧪 Interactive Periodic Table</h1>
+<h1>⚛️ Element Explorer</h1>
 <p>Click an element to see information</p>
 <button onclick="toggleDark()">🌙 Dark Mode</button>
 <button onclick="document.getElementById('quizSection').scrollIntoView({behavior:'smooth'})">🧠 Go to Quiz</button>
+<button onclick="document.getElementById('aiChat').scrollIntoView({behavior:'smooth'})">🤖 Ask Elements</button>
 </header>
 
 <div class="table" id="table"></div>
@@ -60,16 +64,12 @@ button:hover{transform:scale(1.05);background:#005fa3}
 <ol id="leaderboard"></ol>
 </section>
 
-
-⬇️ აქ ჩასვი
-
-<section id="aiChat" style="margin:40px;">
+<section id="aiChat">
   <h1>🤖 Ask About Elements</h1>
-  <input id="chatInput" placeholder="Type: oxygen, gold, iron..." style="padding:12px;width:250px;border-radius:10px;border:1px solid #ccc;">
+  <input id="chatInput" placeholder="Type: oxygen, gold, iron...">
   <button onclick="askElement()">Ask</button>
   <p id="chatAnswer"></p>
 </section>
-
 
 <script>
 const elements = [
@@ -122,6 +122,7 @@ const quizQuestions=[
 {q:"What is the symbol of Chlorine?",a:"Cl",options:["C","Ca","Cl","Ch"]}
 ];
 let current=0,points=0,time=60,timer;
+
 function startQuiz(){current=0;points=0;time=60;document.getElementById("quizBox").style.display="block";showQuestion();clearInterval(timer);timer=setInterval(()=>{time--;document.getElementById("timer").innerHTML="Time: "+time;if(time<=0)finishQuiz();},1000);}
 function showQuestion(){let q=quizQuestions[current];document.getElementById("question").innerHTML="Question "+(current+1)+"/10: "+q.q;document.getElementById("answers").innerHTML=q.options.map(o=>`<button onclick="answer('${o}', this)">${o}</button>`).join("");document.getElementById("score").innerHTML="Score: "+points;}
 function answer(choice,btn){
@@ -135,6 +136,27 @@ function answer(choice,btn){
 }
 function finishQuiz(){clearInterval(timer);document.getElementById("question").innerHTML="🏆 Quiz Finished!";document.getElementById("answers").innerHTML="";document.getElementById("score").innerHTML="Score: "+points+"/10";let name=prompt("Enter your name:");if(!name)name="Player";let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];let existing=leaderboard.find(p=>p.name===name);if(existing){if(points>existing.score){existing.score=points;alert("🎉 New High Score!");}else{alert("❌ You must beat your previous score ("+existing.score+"/10) to save a new result.");showLeaderboard();return;}}else{leaderboard.push({name:name,score:points});}leaderboard.sort((a,b)=>b.score-a.score);leaderboard=leaderboard.slice(0,5);localStorage.setItem("leaderboard",JSON.stringify(leaderboard));showLeaderboard();}
 function showLeaderboard(){let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];document.getElementById("leaderboard").innerHTML=leaderboard.map(p=>`<li>${p.name} - ${p.score}/10</li>`).join("");}
+
+function askElement(){
+  const question = document.getElementById("chatInput").value.toLowerCase().trim();
+  const data = {
+    oxygen: "🫁 Oxygen (O) - Atomic number 8. Essential for breathing and combustion.",
+    hydrogen: "💧 Hydrogen (H) - Atomic number 1. The lightest element in the universe.",
+    carbon: "🌱 Carbon (C) - Atomic number 6. Found in all living organisms.",
+    iron: "🔩 Iron (Fe) - Atomic number 26. Used in construction and manufacturing.",
+    gold: "🥇 Gold (Au) - Atomic number 79. A precious metal used in jewelry and electronics.",
+    silver: "🥈 Silver (Ag) - Atomic number 47. Excellent conductor of electricity.",
+    sodium: "🧂 Sodium (Na) - Atomic number 11. Found in table salt.",
+    helium: "🎈 Helium (He) - Atomic number 2. Used in balloons and cooling systems."
+  };
+
+  let answer = "❓ Sorry, I don't know that element yet. Try: oxygen, hydrogen, carbon, iron, gold, silver, sodium or helium.";
+  for(const key in data){
+    if(question.includes(key)) answer = data[key];
+  }
+  document.getElementById("chatAnswer").innerHTML = answer;
+}
+
 showLeaderboard();
 </script>
 </body>
