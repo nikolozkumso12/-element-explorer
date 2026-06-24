@@ -18,44 +18,109 @@
 </style>
 </head>
 <body>
-<header><h1>Interactive Periodic Table</h1><p>Click an element to see information</p></header>
-<div class="table" id="table"></div>
-<div class="modal" id="modal"><div class="card"><span class="close" onclick="closeModal()">×</span><div class="big" id="mSym"></div><h2 id="mName"></h2><p id="mInfo"></p><p class="muted" id="mNum"></p></div></div>
-<script>
-const elements=[
-[1,'H','Hydrogen','Lightest element. Used in stars and water.'],[2,'He','Helium','Noble gas used in balloons.'],[3,'Li','Lithium','Soft metal used in batteries.'],[4,'Be','Beryllium','Light strong metal.'],[5,'B','Boron','Used in glass and detergents.'],[6,'C','Carbon','Found in all living things.'],[7,'N','Nitrogen','Most of Earth’s air.'],[8,'O','Oxygen','Needed for breathing.'],[9,'F','Fluorine','Very reactive halogen.'],[10,'Ne','Neon','Noble gas used in lights.'],
-[11,'Na','Sodium','Part of table salt.'],[12,'Mg','Magnesium','Light metal; burns bright white.'],[13,'Al','Aluminium','Light metal used in cans and planes.'],[14,'Si','Silicon','Used in computer chips.'],[15,'P','Phosphorus','Important for DNA and bones.'],[16,'S','Sulfur','Yellow nonmetal.'],[17,'Cl','Chlorine','Used to clean water.'],[18,'Ar','Argon','Noble gas in light bulbs.'],
-[19,'K','Potassium','Important for nerves and muscles.'],[20,'Ca','Calcium','Important for bones and teeth.'],[21,'Sc','Scandium','Light transition metal.'],[22,'Ti','Titanium','Strong, light, corrosion-resistant metal.'],[23,'V','Vanadium','Used to strengthen steel.'],[24,'Cr','Chromium','Used for shiny coatings and stainless steel.'],[25,'Mn','Manganese','Used in steelmaking.'],[26,'Fe','Iron','Main metal in steel.'],[27,'Co','Cobalt','Used in magnets and batteries.'],[28,'Ni','Nickel','Used in stainless steel and coins.'],[29,'Cu','Copper','Excellent electrical conductor.'],[30,'Zn','Zinc','Used to protect steel from rust.'],[31,'Ga','Gallium','Metal that melts near room temperature.'],[32,'Ge','Germanium','Semiconductor element.'],[33,'As','Arsenic','Toxic metalloid.'],[34,'Se','Selenium','Trace nutrient.'],[35,'Br','Bromine','Liquid halogen at room temperature.'],[36,'Kr','Krypton','Noble gas used in lighting.'],
-[37,'Rb','Rubidium','Very reactive alkali metal.'],[38,'Sr','Strontium','Used in red fireworks.'],[39,'Y','Yttrium','Used in LEDs and lasers.'],[40,'Zr','Zirconium','Used in nuclear reactors.'],[41,'Nb','Niobium','Used in strong alloys.'],[42,'Mo','Molybdenum','Strengthens steel.'],[43,'Tc','Technetium','Radioactive element used in medicine.'],[44,'Ru','Ruthenium','Rare platinum-group metal.'],[45,'Rh','Rhodium','Very rare metal used in catalysts.'],[46,'Pd','Palladium','Used in catalytic converters.'],[47,'Ag','Silver','Precious metal and good conductor.'],[48,'Cd','Cadmium','Toxic metal used in batteries.'],[49,'In','Indium','Used in touchscreens.'],[50,'Sn','Tin','Used in solder and coatings.'],[51,'Sb','Antimony','Metalloid used in flame retardants.'],[52,'Te','Tellurium','Rare metalloid.'],[53,'I','Iodine','Needed by the thyroid gland.'],[54,'Xe','Xenon','Noble gas used in lamps.'],
-[55,'Cs','Cesium','Very reactive alkali metal.'],[56,'Ba','Barium','Used in medical X-ray imaging.'],[57,'La','Lanthanum','Rare-earth element.'],[58,'Ce','Cerium','Rare-earth metal used in polishing.'],[59,'Pr','Praseodymium','Used in magnets and glass.'],[60,'Nd','Neodymium','Used in very strong magnets.'],[61,'Pm','Promethium','Radioactive rare-earth element.'],[62,'Sm','Samarium','Used in magnets.'],[63,'Eu','Europium','Used in red and blue phosphors.'],[64,'Gd','Gadolinium','Used in MRI contrast agents.'],[65,'Tb','Terbium','Used in green phosphors.'],[66,'Dy','Dysprosium','Used in high-performance magnets.'],[67,'Ho','Holmium','Rare-earth metal.'],[68,'Er','Erbium','Used in fiber optics.'],[69,'Tm','Thulium','Rare-earth element.'],[70,'Yb','Ytterbium','Rare-earth metal.'],[71,'Lu','Lutetium','Dense rare-earth element.'],
-[72,'Hf','Hafnium','Used in control rods and alloys.'],[73,'Ta','Tantalum','Used in electronics.'],[74,'W','Tungsten','Very high melting point.'],[75,'Re','Rhenium','Used in jet engine alloys.'],[76,'Os','Osmium','Very dense metal.'],[77,'Ir','Iridium','Very corrosion-resistant metal.'],[78,'Pt','Platinum','Precious metal used in catalysts.'],[79,'Au','Gold','Precious metal.'],[80,'Hg','Mercury','Liquid metal at room temperature.'],[81,'Tl','Thallium','Toxic metal.'],[82,'Pb','Lead','Heavy toxic metal.'],[83,'Bi','Bismuth','Heavy metal with low toxicity.'],[84,'Po','Polonium','Highly radioactive element.'],[85,'At','Astatine','Very rare radioactive halogen.'],[86,'Rn','Radon','Radioactive noble gas.'],
-[87,'Fr','Francium','Extremely rare radioactive alkali metal.'],[88,'Ra','Radium','Radioactive alkaline earth metal.'],[89,'Ac','Actinium','Radioactive actinide.'],[90,'Th','Thorium','Radioactive element used in nuclear research.'],[91,'Pa','Protactinium','Rare radioactive element.'],[92,'U','Uranium','Used as nuclear fuel.'],[93,'Np','Neptunium','Radioactive actinide.'],[94,'Pu','Plutonium','Radioactive element used in nuclear energy.'],[95,'Am','Americium','Used in smoke detectors.'],[96,'Cm','Curium','Radioactive actinide.'],[97,'Bk','Berkelium','Synthetic radioactive element.'],[98,'Cf','Californium','Used as a neutron source.'],[99,'Es','Einsteinium','Synthetic radioactive element.'],[100,'Fm','Fermium','Synthetic radioactive element.'],[101,'Md','Mendelevium','Synthetic element.'],[102,'No','Nobelium','Synthetic element.'],[103,'Lr','Lawrencium','Synthetic actinide.'],
-[104,'Rf','Rutherfordium','Synthetic transition metal.'],[105,'Db','Dubnium','Synthetic element.'],[106,'Sg','Seaborgium','Synthetic element.'],[107,'Bh','Bohrium','Synthetic element.'],[108,'Hs','Hassium','Synthetic element.'],[109,'Mt','Meitnerium','Synthetic element.'],[110,'Ds','Darmstadtium','Synthetic element.'],[111,'Rg','Roentgenium','Synthetic element.'],[112,'Cn','Copernicium','Synthetic element.'],[113,'Nh','Nihonium','Synthetic element.'],[114,'Fl','Flerovium','Synthetic element.'],[115,'Mc','Moscovium','Synthetic element.'],[116,'Lv','Livermorium','Synthetic element.'],[117,'Ts','Tennessine','Synthetic halogen.'],[118,'Og','Oganesson','Synthetic noble gas.']
-];
-const table=document.getElementById('table');
-elements.forEach(e=>{let div=document.createElement('div');div.className='el';div.innerHTML=`<div class="num">${e[0]}</div><div class="sym">${e[1]}</div><div class="name">${e[2]}</div>`;div.onclick=()=>openModal(e);table.appendChild(div)});
-function openModal(e){document.getElementById('mSym').textContent=e[1];document.getElementById('mName').textContent=e[2];document.getElementById('mInfo').textContent=e[3];document.getElementById('mNum').textContent='Atomic number: '+e[0];document.getElementById('modal').style.display='flex'}
-function closeModal(){document.getElementById('modal').style.display='none'}
-</script>
 <div style="text-align:center;margin:40px;">
-<h2>Quiz</h2>
-<p>What is the symbol of Oxygen?</p>
+  <button onclick="startQuiz()">🧠 Start Quiz</button>
 
-<button onclick="quiz('O')">O</button>
-<button onclick="quiz('H')">H</button>
-<button onclick="quiz('N')">N</button>
+  <div id="quizBox" style="display:none;margin-top:20px;">
+    <h2 id="timer">Time: 60</h2>
+    <h3 id="question"></h3>
+    <div id="answers"></div>
+    <p id="score"></p>
+  </div>
 
-<p id="quizResult"></p>
+  <h2>🥇 Leaderboard</h2>
+  <ol id="leaderboard"></ol>
 </div>
 
 <script>
-function quiz(answer){
-    if(answer=="O"){
-        document.getElementById("quizResult").innerHTML="✅ Correct!";
-    }else{
-        document.getElementById("quizResult").innerHTML="❌ Wrong!";
+const quizQuestions = [
+  {q:"What is the symbol of Oxygen?", a:"O", options:["O","H","N","C"]},
+  {q:"What is the symbol of Hydrogen?", a:"H", options:["O","H","He","Na"]},
+  {q:"What is the symbol of Carbon?", a:"C", options:["Ca","C","Cl","Co"]},
+  {q:"What is the symbol of Sodium?", a:"Na", options:["S","So","Na","N"]},
+  {q:"What is the symbol of Helium?", a:"He", options:["H","He","Ho","Ha"]},
+  {q:"What is the symbol of Iron?", a:"Fe", options:["Ir","I","Fe","F"]},
+  {q:"What is the symbol of Gold?", a:"Au", options:["Ag","Au","G","Go"]},
+  {q:"What is the symbol of Silver?", a:"Ag", options:["S","Si","Ag","Au"]},
+  {q:"What is the symbol of Calcium?", a:"Ca", options:["C","Ca","Cl","Co"]},
+  {q:"What is the symbol of Chlorine?", a:"Cl", options:["C","Ca","Cl","Ch"]}
+];
+
+let current = 0;
+let points = 0;
+let time = 60;
+let timer;
+
+function startQuiz(){
+  current = 0;
+  points = 0;
+  time = 60;
+  document.getElementById("quizBox").style.display = "block";
+  showQuestion();
+
+  clearInterval(timer);
+  timer = setInterval(() => {
+    time--;
+    document.getElementById("timer").innerHTML = "Time: " + time;
+    if(time <= 0){
+      finishQuiz();
     }
+  }, 1000);
 }
+
+function showQuestion(){
+  let q = quizQuestions[current];
+  document.getElementById("question").innerHTML = "Question " + (current+1) + "/10: " + q.q;
+
+  let html = "";
+  q.options.forEach(option => {
+    html += `<button onclick="answer('${option}')">${option}</button> `;
+  });
+
+  document.getElementById("answers").innerHTML = html;
+  document.getElementById("score").innerHTML = "Score: " + points;
+}
+
+function answer(choice){
+  if(choice === quizQuestions[current].a){
+    points++;
+  }
+
+  current++;
+
+  if(current >= 10){
+    finishQuiz();
+  } else {
+    showQuestion();
+  }
+}
+
+function finishQuiz(){
+  clearInterval(timer);
+
+  document.getElementById("question").innerHTML = "🏆 Quiz Finished!";
+  document.getElementById("answers").innerHTML = "";
+  document.getElementById("score").innerHTML = "Score: " + points + "/10";
+
+  let name = prompt("Enter your name for leaderboard:");
+  if(!name) name = "Player";
+
+  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+  leaderboard.push({name:name, score:points});
+  leaderboard.sort((a,b) => b.score - a.score);
+  leaderboard = leaderboard.slice(0,5);
+
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  showLeaderboard();
+}
+
+function showLeaderboard(){
+  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+  document.getElementById("leaderboard").innerHTML =
+    leaderboard.map(p => `<li>${p.name} - ${p.score}/10</li>`).join("");
+}
+
+showLeaderboard();
 </script>
 </body>
 </html>
