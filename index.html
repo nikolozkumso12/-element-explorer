@@ -1,91 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Chemistry Elements</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f4f8ff;
-      text-align: center;
-    }
-
-    h1 {
-      color: #1f4e79;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 40px;
-    }
-
-    .element {
-      background: white;
-      width: 140px;
-      height: 140px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px gray;
-      padding: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .element:hover {
-      transform: scale(1.1);
-      background: #dff1ff;
-    }
-
-    .info {
-      display: none;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    .element:hover .info {
-      display: block;
-    }
-
-    .symbol {
-      font-size: 40px;
-      font-weight: bold;
-      color: #0077cc;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive Periodic Table</title>
+<style>
+  body{font-family:Arial, sans-serif;background:#f3f7ff;margin:0;text-align:center;color:#1f2937}
+  header{padding:25px;background:#1f4e79;color:white}
+  .table{display:grid;grid-template-columns:repeat(18,64px);gap:6px;justify-content:center;margin:25px auto;max-width:1250px}
+  .el{background:white;border-radius:10px;padding:6px;height:58px;box-shadow:0 2px 6px #bbb;cursor:pointer;transition:.2s;border:2px solid transparent}
+  .el:hover{transform:scale(1.08);border-color:#0077cc;background:#e8f5ff}
+  .num{font-size:11px;text-align:left}.sym{font-size:22px;font-weight:bold;color:#0077cc}.name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}
+  .card{background:white;border-radius:18px;max-width:420px;width:100%;padding:25px;box-shadow:0 10px 30px #111;text-align:left}
+  .close{float:right;font-size:24px;cursor:pointer}.big{font-size:55px;color:#0077cc;font-weight:bold;text-align:center}.muted{color:#555}
+  @media(max-width:900px){.table{grid-template-columns:repeat(6,58px)}.el{height:54px}.sym{font-size:20px}}
+</style>
 </head>
 <body>
-
-  <h1>Chemistry Elements</h1>
-  <p>Hover over an element to see information</p>
-
-  <div class="container">
-
-    <div class="element">
-      <div class="symbol">H</div>
-      <h3>Hydrogen</h3>
-      <div class="info">Atomic number: 1<br>Lightest element.</div>
-    </div>
-
-    <div class="element">
-      <div class="symbol">O</div>
-      <h3>Oxygen</h3>
-      <div class="info">Atomic number: 8<br>Needed for breathing.</div>
-    </div>
-
-    <div class="element">
-      <div class="symbol">C</div>
-      <h3>Carbon</h3>
-      <div class="info">Atomic number: 6<br>Found in all living things.</div>
-    </div>
-
-    <div class="element">
-      <div class="symbol">Na</div>
-      <h3>Sodium</h3>
-      <div class="info">Atomic number: 11<br>Part of table salt.</div>
-    </div>
-
-  </div>
-
+<header><h1>Interactive Periodic Table</h1><p>Click an element to see information</p></header>
+<div class="table" id="table"></div>
+<div class="modal" id="modal"><div class="card"><span class="close" onclick="closeModal()">×</span><div class="big" id="mSym"></div><h2 id="mName"></h2><p id="mInfo"></p><p class="muted" id="mNum"></p></div></div>
+<script>
+const elements=[
+[1,'H','Hydrogen','Lightest element. Used in stars and water.'],[2,'He','Helium','Noble gas used in balloons.'],[3,'Li','Lithium','Soft metal used in batteries.'],[4,'Be','Beryllium','Light strong metal.'],[5,'B','Boron','Used in glass and detergents.'],[6,'C','Carbon','Found in all living things.'],[7,'N','Nitrogen','Most of Earth’s air.'],[8,'O','Oxygen','Needed for breathing.'],[9,'F','Fluorine','Very reactive halogen.'],[10,'Ne','Neon','Noble gas used in lights.'],
+[11,'Na','Sodium','Part of table salt.'],[12,'Mg','Magnesium','Light metal; burns bright white.'],[13,'Al','Aluminium','Light metal used in cans and planes.'],[14,'Si','Silicon','Used in computer chips.'],[15,'P','Phosphorus','Important for DNA and bones.'],[16,'S','Sulfur','Yellow nonmetal.'],[17,'Cl','Chlorine','Used to clean water.'],[18,'Ar','Argon','Noble gas in light bulbs.'],
+[19,'K','Potassium','Important for nerves and muscles.'],[20,'Ca','Calcium','Important for bones and teeth.'],[21,'Sc','Scandium','Light transition metal.'],[22,'Ti','Titanium','Strong, light, corrosion-resistant metal.'],[23,'V','Vanadium','Used to strengthen steel.'],[24,'Cr','Chromium','Used for shiny coatings and stainless steel.'],[25,'Mn','Manganese','Used in steelmaking.'],[26,'Fe','Iron','Main metal in steel.'],[27,'Co','Cobalt','Used in magnets and batteries.'],[28,'Ni','Nickel','Used in stainless steel and coins.'],[29,'Cu','Copper','Excellent electrical conductor.'],[30,'Zn','Zinc','Used to protect steel from rust.'],[31,'Ga','Gallium','Metal that melts near room temperature.'],[32,'Ge','Germanium','Semiconductor element.'],[33,'As','Arsenic','Toxic metalloid.'],[34,'Se','Selenium','Trace nutrient.'],[35,'Br','Bromine','Liquid halogen at room temperature.'],[36,'Kr','Krypton','Noble gas used in lighting.'],
+[37,'Rb','Rubidium','Very reactive alkali metal.'],[38,'Sr','Strontium','Used in red fireworks.'],[39,'Y','Yttrium','Used in LEDs and lasers.'],[40,'Zr','Zirconium','Used in nuclear reactors.'],[41,'Nb','Niobium','Used in strong alloys.'],[42,'Mo','Molybdenum','Strengthens steel.'],[43,'Tc','Technetium','Radioactive element used in medicine.'],[44,'Ru','Ruthenium','Rare platinum-group metal.'],[45,'Rh','Rhodium','Very rare metal used in catalysts.'],[46,'Pd','Palladium','Used in catalytic converters.'],[47,'Ag','Silver','Precious metal and good conductor.'],[48,'Cd','Cadmium','Toxic metal used in batteries.'],[49,'In','Indium','Used in touchscreens.'],[50,'Sn','Tin','Used in solder and coatings.'],[51,'Sb','Antimony','Metalloid used in flame retardants.'],[52,'Te','Tellurium','Rare metalloid.'],[53,'I','Iodine','Needed by the thyroid gland.'],[54,'Xe','Xenon','Noble gas used in lamps.'],
+[55,'Cs','Cesium','Very reactive alkali metal.'],[56,'Ba','Barium','Used in medical X-ray imaging.'],[57,'La','Lanthanum','Rare-earth element.'],[58,'Ce','Cerium','Rare-earth metal used in polishing.'],[59,'Pr','Praseodymium','Used in magnets and glass.'],[60,'Nd','Neodymium','Used in very strong magnets.'],[61,'Pm','Promethium','Radioactive rare-earth element.'],[62,'Sm','Samarium','Used in magnets.'],[63,'Eu','Europium','Used in red and blue phosphors.'],[64,'Gd','Gadolinium','Used in MRI contrast agents.'],[65,'Tb','Terbium','Used in green phosphors.'],[66,'Dy','Dysprosium','Used in high-performance magnets.'],[67,'Ho','Holmium','Rare-earth metal.'],[68,'Er','Erbium','Used in fiber optics.'],[69,'Tm','Thulium','Rare-earth element.'],[70,'Yb','Ytterbium','Rare-earth metal.'],[71,'Lu','Lutetium','Dense rare-earth element.'],
+[72,'Hf','Hafnium','Used in control rods and alloys.'],[73,'Ta','Tantalum','Used in electronics.'],[74,'W','Tungsten','Very high melting point.'],[75,'Re','Rhenium','Used in jet engine alloys.'],[76,'Os','Osmium','Very dense metal.'],[77,'Ir','Iridium','Very corrosion-resistant metal.'],[78,'Pt','Platinum','Precious metal used in catalysts.'],[79,'Au','Gold','Precious metal.'],[80,'Hg','Mercury','Liquid metal at room temperature.'],[81,'Tl','Thallium','Toxic metal.'],[82,'Pb','Lead','Heavy toxic metal.'],[83,'Bi','Bismuth','Heavy metal with low toxicity.'],[84,'Po','Polonium','Highly radioactive element.'],[85,'At','Astatine','Very rare radioactive halogen.'],[86,'Rn','Radon','Radioactive noble gas.'],
+[87,'Fr','Francium','Extremely rare radioactive alkali metal.'],[88,'Ra','Radium','Radioactive alkaline earth metal.'],[89,'Ac','Actinium','Radioactive actinide.'],[90,'Th','Thorium','Radioactive element used in nuclear research.'],[91,'Pa','Protactinium','Rare radioactive element.'],[92,'U','Uranium','Used as nuclear fuel.'],[93,'Np','Neptunium','Radioactive actinide.'],[94,'Pu','Plutonium','Radioactive element used in nuclear energy.'],[95,'Am','Americium','Used in smoke detectors.'],[96,'Cm','Curium','Radioactive actinide.'],[97,'Bk','Berkelium','Synthetic radioactive element.'],[98,'Cf','Californium','Used as a neutron source.'],[99,'Es','Einsteinium','Synthetic radioactive element.'],[100,'Fm','Fermium','Synthetic radioactive element.'],[101,'Md','Mendelevium','Synthetic element.'],[102,'No','Nobelium','Synthetic element.'],[103,'Lr','Lawrencium','Synthetic actinide.'],
+[104,'Rf','Rutherfordium','Synthetic transition metal.'],[105,'Db','Dubnium','Synthetic element.'],[106,'Sg','Seaborgium','Synthetic element.'],[107,'Bh','Bohrium','Synthetic element.'],[108,'Hs','Hassium','Synthetic element.'],[109,'Mt','Meitnerium','Synthetic element.'],[110,'Ds','Darmstadtium','Synthetic element.'],[111,'Rg','Roentgenium','Synthetic element.'],[112,'Cn','Copernicium','Synthetic element.'],[113,'Nh','Nihonium','Synthetic element.'],[114,'Fl','Flerovium','Synthetic element.'],[115,'Mc','Moscovium','Synthetic element.'],[116,'Lv','Livermorium','Synthetic element.'],[117,'Ts','Tennessine','Synthetic halogen.'],[118,'Og','Oganesson','Synthetic noble gas.']
+];
+const table=document.getElementById('table');
+elements.forEach(e=>{let div=document.createElement('div');div.className='el';div.innerHTML=`<div class="num">${e[0]}</div><div class="sym">${e[1]}</div><div class="name">${e[2]}</div>`;div.onclick=()=>openModal(e);table.appendChild(div)});
+function openModal(e){document.getElementById('mSym').textContent=e[1];document.getElementById('mName').textContent=e[2];document.getElementById('mInfo').textContent=e[3];document.getElementById('mNum').textContent='Atomic number: '+e[0];document.getElementById('modal').style.display='flex'}
+function closeModal(){document.getElementById('modal').style.display='none'}
+</script>
 </body>
 </html>
